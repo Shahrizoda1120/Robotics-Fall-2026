@@ -1,6 +1,8 @@
 # Week 4 — PID Line Following Competition
 
-PID-based line following using two reflectance sensors in TRIK Studio.
+YouTube video: https://youtu.be/FvkpTiQymGA?si=RE_Qg1kCHN-UQdMV
+
+PID-based line following using two sensors in TRIK Studio.
 
 ## Setup
 
@@ -39,4 +41,4 @@ The final steering correction is limited to ±25.
 
 The controller continuously changes the difference between the left and right motor speeds to keep the robot aligned with the line.
 
-🎥 Demo: https://youtu.be/FvkpTiQymGA?si=RE_Qg1kCHN-UQdMV
+
