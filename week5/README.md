@@ -89,4 +89,4 @@ For example, `88 7` means: 88 ms after the motor was switched on, the wheel had 
 **Main findings:**
 - **The linear model is only accurate in the middle of the range.** It is off at very low and very high power, and T_m changes with power (0.2 to 0.7 s at low PWM, about 0.05 s at full power).
 - **Wheel 3 spins faster than wheel 4 at the same PWM** (10.0 vs 9.3 rad/s at +50 %) and reacts more slowly, because it is the bigger wheel.
-- **With equal PWM the robot will curve towards the wheel 4 side**, so next week each wheel needs its own radius and its own parameters.
+
