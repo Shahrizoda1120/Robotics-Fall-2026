@@ -1,6 +1,6 @@
 # Week 5: Motor parameter identification
 
-**Goal:** measure how the two drive motors of my robot (A17) react to power, and describe each motor with two numbers, **T_m** and **k_e**. These numbers are reused in Week 6 (localization) and Week 7 (go-to-goal).
+**Goal:** measure how the two drive motors of the robot react to power, and describe each motor with two numbers, **T_m** and **k_e**. These numbers are reused in Week 6 (localization) and Week 7 (go-to-goal).
 
 ## Files in this folder
 
