@@ -87,3 +87,5 @@ The notebook is the Colab analysis from the Lab 6 README:
 - **Max error:** 0.987 m at 43.6 s (printed as 1.0 m). This error compares the two runs at the same time after the start. The real run is 35 s slower, so most of it comes from timing, not from a different path.
 
 ## Discussion
+
+The real trajectory leaves the model on almost every straight move: the robot drives off at an angle of up to about 20° and turns back at the end of the move, so the corners of the 32 shift and the run ends 0.098 m away from the simulator. The error source from the lecture that explains this is unequal wheels and motors: in week 5, motor M3 turned faster than M4 at the same power (10.0 vs 9.3 rad/s at 50 %), and since each wheel has its own PID, the faster wheel reaches its target first and the robot turns while the other wheel catches up. The robot does know about this part of the error, because it comes from its own encoders and shows up in its odometry. It cannot know about errors the encoders do not measure, such as wheel slip or a slightly wrong R or B, so its real position on the floor can be even further from the model than the plot shows.
