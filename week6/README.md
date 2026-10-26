@@ -32,12 +32,10 @@ Every sample, the program uses how much each wheel turned since the last sample 
 
 ## 2. How the program works
 
-The program has two threads, as in the course demo `Localization_demo.qrs`:
+The program has two threads:
 
 1. **Main thread:** sets the constants, deletes the old log file, starts the odometry thread, drives the 20 moves of the digit 32 with `forward(distance)` and `turn(angle)`, waits 0.5 s and stops the odometry thread.
 2. **Odometry thread:** reads both encoders, updates `x` and `y` with the formulas above, writes one line to the log, waits 20 ms, and repeats.
-
-`forward` and `turn` are encoder-based, as in Lab 2: each wheel gets a target encoder angle and its own PID drives it there (Kp = 1.5, Ki = 0.5, Kd = 0.15, output limited to ±50 % power). A move ends when both wheels are within 2° of their target and have almost stopped.
 
 **Simulator vs real program.** Both files have the same blocks. Only these differ:
 
@@ -47,7 +45,6 @@ The program has two threads, as in the course demo `Localization_demo.qrs`:
 | Log file | `odometry_data_sim_32.txt` | `odometry_data_real_32.txt` |
 | Marker Down / Marker Up | yes, so the simulator draws the path | no |
 
-The real program is uploaded with **Generation (Java Script)**, because Python generation cannot run the odometry thread.
 
 ## 3. How the data is organized
 
@@ -74,7 +71,6 @@ The notebook is the Colab analysis from the Lab 6 README:
 2. **Trajectories:** plot the simulator and real robot paths on one plot.
 3. **Error over time:** resample the simulator log to the real robot's timestamps, plot the distance between the two runs, and print the final and the maximum error.
 
-**How to run it:** open the notebook in Colab, choose *Runtime > Run all*, and upload both txt files when asked.
 
 ## 5. Results
 
