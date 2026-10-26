@@ -91,4 +91,4 @@ The notebook is the Colab analysis from the Lab 6 README:
 - *Unequal motors:* both wheels are the same size, but on most forward moves the left wheel (M3) runs ahead of the right one, as in week 5, where M3 was faster at the same power (10.0 vs 9.3 rad/s at +50 %).
 - *Heading error dominates:* each move starts from where the wheels actually stopped, so small heading errors are never corrected and add up over the 20 moves.
 
-**Does the robot know it is wrong?** Partly: it sees these errors in its own encoders but never uses its odometry to correct them, and it cannot see errors the encoders do not measure, such as wheel slip or a wrong R or B.
+**Does the robot know it is wrong?** No: its odometry is only a belief built from its own encoders, so it cannot detect errors the encoders do not measure, such as wheel slip or a wrong R or B, and even the drift that does show up in its odometry is never used to correct the path.
