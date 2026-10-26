@@ -84,4 +84,11 @@ The notebook is the Colab analysis from the Lab 6 README:
 
 ## Discussion
 
-The real trajectory leaves the model on almost every straight move: the robot drives off at an angle of up to about 20° and turns back at the end of the move, so the corners of the 32 shift and the run ends 0.098 m away from the simulator. The error source from the lecture that explains this is unequal wheels and motors: in week 5, motor M3 turned faster than M4 at the same power (10.0 vs 9.3 rad/s at 50 %), and since each wheel has its own PID, the faster wheel reaches its target first and the robot turns while the other wheel catches up. The robot does know about this part of the error, because it comes from its own encoders and shows up in its odometry. It cannot know about errors the encoders do not measure, such as wheel slip or a slightly wrong R or B, so its real position on the floor can be even further from the model than the plot shows.
+**Where the real trajectory leaves the model.** In the simulator every straight move stays within 1° of the planned direction. On the real robot every straight is turned to the right, from about 2° on the first move to about 19° on the last, so the run ends 0.098 m away from the simulator.
+
+**Which error sources from the lecture explain it.**
+
+- *Unequal motors:* both wheels are the same size, but on most forward moves the left wheel (M3) runs ahead of the right one, as in week 5, where M3 was faster at the same power (10.0 vs 9.3 rad/s at +50 %).
+- *Heading error dominates:* each move starts from where the wheels actually stopped, so small heading errors are never corrected and add up over the 20 moves.
+
+**Does the robot know it is wrong?** Partly: it sees these errors in its own encoders but never uses its odometry to correct them, and it cannot see errors the encoders do not measure, such as wheel slip or a wrong R or B.
