@@ -28,7 +28,7 @@ Every sample, the program uses how much each wheel turned since the last sample 
 - `R` is the wheel radius and `B` the distance between the wheels.
 - E3 is the left wheel (M3), E4 the right wheel (M4).
 - `x` points in the starting direction, `y` to the left of it, and `(0, 0)` is the start point.
-- This is the formula table of the Lab 6 README before its Oct 19 update. The current table updates the position with `cos(φ)` instead of `cos(φ + Δφ/2)`. The heading φ is the same in both.
+
 
 ## 2. How the program works
 
