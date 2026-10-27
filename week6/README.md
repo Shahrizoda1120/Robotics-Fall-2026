@@ -34,7 +34,7 @@ Every sample, the program uses how much each wheel turned since the last sample 
 
 The program has two threads:
 
-1. **Main thread:** sets the constants, deletes the old log file, starts the odometry thread, drives the 20 moves of the digit 32 with `forward(distance)` and `turn(angle)`, waits 0.5 s and stops the odometry thread.
+1. **Main thread:** sets the constants, deletes the old log file, starts the odometry thread, drives the moves of the digit 32 with `forward(distance)` and `turn(angle)`, waits 0.5 s and stops the odometry thread.
 2. **Odometry thread:** reads both encoders, updates `x` and `y` with the formulas above, writes one line to the log, waits 20 ms, and repeats.
 
 **Simulator vs real program.** Both files have the same blocks. Only these differ:
