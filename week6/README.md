@@ -10,24 +10,35 @@
 | `trajectory_real.qrs` | The same program, used on the real robot |
 | `odometry_data_sim_32.txt` | Odometry log of the simulator run |
 | `odometry_data_real_32.txt` | Odometry log of the real robot run |
-| `lab6_odometry.ipynb` | Colab notebook: both trajectories on one plot, and the error between them over time |
+| `lab6_task_odometry.ipynb` | Colab notebook: both trajectories on one plot, and the error between them over time |
 
 ## 1. The idea
 
 The robot never sees the world. It only counts how far each wheel has turned and adds these small steps up into a position `(x, y)` and a heading `φ`. This is odometry, and it is the robot's **belief** about where it is, not the truth.
 
-Every sample, the program uses how much each wheel turned since the last sample (ΔθL, ΔθR, encoder degrees converted to radians):
+The odometry thread repeats one step in a loop. One loop is one **sample**.
+
+**Symbols.** The subscript L always means the left wheel (motor M3, encoder E3), and R the right wheel (motor M4, encoder E4).
+
+| Symbol | Meaning | Unit | In the code |
+|---|---|---|---|
+| `ΔθL`, `ΔθR` | How much the left / right wheel turned since the last sample (encoder degrees × π/180) | rad | `odomEncL - odomPrevL`, `odomEncR - odomPrevR` (in degrees) |
+| `r` | Wheel radius | m | `radius` |
+| `B` | Distance between the two wheels | m | `track` |
+| `dL`, `dR` | Distance the left / right wheel rolled in this sample | m | `odomDL`, `odomDR` |
+| `d` | Distance the centre of the robot moved in this sample | m | `odomD` |
+| `φ` | Heading: the direction the robot faces, 0 = the starting direction, positive = turned to the left | rad | `odomTheta` |
+| `Δφ` | How much the heading changed in this sample | rad | `odomDTheta` |
+| `x`, `y` | Position of the centre of the robot. `(0, 0)` is the start point, `x` points in the starting direction, `y` to the left of it | m | `odomX`, `odomY` |
+
+**Formulas**, applied every sample:
 
 | Quantity | Formula |
 |---|---|
-| Wheel travel | `dL = R · ΔθL`, `dR = R · ΔθR` |
+| Wheel travel | `dL = r · ΔθL`, `dR = r · ΔθR` |
 | Robot travel | `d = (dL + dR) / 2` |
 | Heading change | `Δφ = (dR − dL) / B` |
 | New position | `x ← x + d · cos(φ + Δφ/2)`, `y ← y + d · sin(φ + Δφ/2)`, then `φ ← φ + Δφ` |
-
-- `R` is the wheel radius and `B` the distance between the wheels.
-- E3 is the left wheel (M3), E4 the right wheel (M4).
-- `x` points in the starting direction, `y` to the left of it, and `(0, 0)` is the start point.
 
 
 ## 2. How the program works
@@ -41,7 +52,7 @@ The program has two threads:
 
 | | `trajectory_sim.qrs` | `trajectory_real.qrs` |
 |---|---|---|
-| `R`, `B` (`radius`, `track` in the code) | 0.028 m, 0.154 m (simulator robot) | 0.043 m, 0.196 m (real robot, measured in week 2) |
+| `r`, `B` (`radius`, `track` in the code) | 0.028 m, 0.154 m (simulator robot) | 0.043 m, 0.196 m (real robot, measured in week 2) |
 | Log file | `odometry_data_sim_32.txt` | `odometry_data_real_32.txt` |
 | Marker Down / Marker Up | yes, so the simulator draws the path | no |
 
@@ -91,4 +102,4 @@ The notebook is the Colab analysis from the Lab 6 README:
 - *Unequal motors:* both wheels are the same size, but on most forward moves the left wheel (M3) runs ahead of the right one, as in week 5, where M3 was faster at the same power (10.0 vs 9.3 rad/s at +50 %).
 - *Heading error dominates:* each move starts from where the wheels actually stopped, so small heading errors are never corrected and add up over the 20 moves.
 
-**Does the robot know it is wrong?** No: its odometry is only a belief built from its own encoders, so it cannot detect errors the encoders do not measure, such as wheel slip or a wrong R or B, and even the drift that does show up in its odometry is never used to correct the path.
+**Does the robot know it is wrong?** No: its odometry is only a belief built from its own encoders, so it cannot detect errors the encoders do not measure, such as wheel slip or a wrong r or B, and even the drift that does show up in its odometry is never used to correct the path.
