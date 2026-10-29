@@ -76,7 +76,6 @@ For example, `0.0015009831567151233,0,802` means: 802 ms after the start, the ro
 
 ## 4. What the notebook does
 
-The notebook is the Colab analysis from the Lab 6 README:
 
 1. **Load** both logs.
 2. **Trajectories:** plot the simulator and real robot paths on one plot.
