@@ -116,9 +116,8 @@ The three versions use the same steps 1 to 4 and 6 to 9. They differ only in how
 v = min(Kv · rho, vMax)
 ```
 
-- Far from the waypoint, `Kv · rho` is large and `v` is capped at `vMax`, so the robot drives at a steady top speed it can still steer.
-- Within `vMax / Kv` = 10 cm of the waypoint, `v` falls in proportion to the distance, so the robot slows down as it arrives instead of overshooting.
-- **Weak point:** it ignores the heading error. It drives at full power even when the waypoint is behind it, so it turns while driving and swings wide at sharp corners.
+- Far from the waypoint, `Kv · rho` is large and `v` is capped at `vMax=40%`, so the robot drives at a steady top speed it can still steer.
+
 
 ### V2: turn, then drive
 
@@ -127,8 +126,8 @@ v = max(vMin, min(Kv · rho, vMax))
 v = 0 while |eTheta| > turnErr
 ```
 
-- If the waypoint is more than `turnErr` (0.5 rad ≈ 29°) off, the robot stops and rotates on the spot. Then it drives with only a small error left, which `w` corrects. This is the lecture's turn-then-drive choice: sharper corners, slower runs.
-- `vMin` = 18 % is `minPower` from the professor's script. Very low power may not move the real robot on the floor, so without it the robot could stall just before a waypoint and never get within `eps`. This is what makes the smaller `eps` = 3 cm safe for V2.
+- If the waypoint is more than `turnErr` (0.5 rad ≈ 29°) off, the robot stops and rotates on the spot. Then it drives with only a small error left, which `w` corrects. 
+- `vMin` = 18 % is `minPower`. 
 - In the block code the "v = 0" rule is one formula, `v = v · (1 + sgn(turnErr − |eTheta|)) / 2`. When |eTheta| < turnErr, `sgn` gives +1 and `v` stays; when |eTheta| > turnErr, `sgn` gives −1 and `v` becomes 0. This keeps the controller in one Function block, without an If block.
 
 ### V3: cos controller
