@@ -27,9 +27,6 @@ yg = {0, 30, 30, 30, 60, 60, 60, 60, 30, 30, 0, 0}
 ```
 ![Digit 32: planned waypoints](waypoints_32.png)
 
-- (30,30) appears twice: the robot draws the middle bar of the 3 out to (0,30) and comes back along it.
-- The start point is not in the arrays, because the robot is already there.
-
 ## 2. One control step
 
 The program repeats the steps below once every 20 ms until the robot reaches the current waypoint `i`. Step 1 is the week 6 odometry; steps 2, 3, 4, 6 and 7 are the go-to-goal table of the Lab 7 lecture. Program variable names are in parentheses.
