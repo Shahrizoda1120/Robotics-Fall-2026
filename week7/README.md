@@ -195,4 +195,14 @@ One line per sample, no header: `x,y,time`, with `x`, `y` in **cm** and `time` i
 
 ## Discussion
 
-Every version cuts each corner by up to ε (5 cm for V1 and V3, 3 cm for V2), because it switches to the next waypoint ε early, which is why V2 has the smallest misses. V1 swings out widest at the two 180° reversals, because it keeps full forward power while turning. V3 has the same gains but slows down with `cos(e_θ)`, so in the simulator it stays closer to the planned path (at most 3.2 cm away, against 5.0 cm for V1). On the real robot, V2 overshot (30,0), (50,0) and (80,60) by about 3 cm: it switches only 3 cm before each corner, and the robot keeps rolling for a moment after the switch (T_m ≈ 0.2 s in week 5). V1 and V3 weave across the straight lines on the real robot but not in the simulator, which matches the lecture's "K_θ too high" oscillation: the real motors lag and the loop runs every 60 ms instead of 20 ms, while V2 with K_θ = 5 barely weaves. The remaining real-vs-model gap in these plots is a **control** problem, because both curves are odometry and the real robot still reached every waypoint within ε by its own estimate; localization errors such as wheel slip or a wrong r or B cannot show up in these logs at all.
+**1. Which corners were cut or overshot, and why**
+
+- **All versions cut corners by up to `eps`.** The robot switches to the next waypoint `eps` before the corner: 5 cm for V1 and V3, 3 cm for V2. That is why V2 has the smallest misses.
+- **V1 swings out widest at the two 180° reversals of the 3.** It keeps full forward power while turning around.
+- **V3 has the same gains as V1 but squarer corners.** `cos(eTheta)` slows it down while it is badly aimed. In the simulator it stays within 3.2 cm of the planned path, against 5.0 cm for V1.
+- **On the real robot, V2 overshot (30,0), (50,0) and (80,60) by about 3 cm.** It switches only 3 cm before each corner, and the real robot keeps rolling for a moment after the switch (T_m ≈ 0.2 s, from week 5).
+
+**2. Real robot vs simulator**
+
+- **V1 and V3 weave across the straight lines on the real robot, but not in the simulator.** This is the lecture's "`Kth` too high" oscillation: the real motors react with a delay, and the real loop runs every 60 ms instead of 20 ms. V2, with `Kth` = 5, barely weaves.
+- **The gap visible in these plots is a control problem.** Both curves are the robot's own odometry, and by that estimate the real robot reached every waypoint within `eps`. Localization errors, such as wheel slip or a wrong `r` or `B`, cannot show up in these logs at all; checking them would need an outside measurement, such as the tape measurement.
