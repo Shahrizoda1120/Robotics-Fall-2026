@@ -193,13 +193,6 @@ One line per sample, no header: `x,y,time`, with `x`, `y` in **cm** and `time` i
 | V2: turn, then drive | 41.9 s / 19.4 s | 2.0 cm / 1.1 cm | 2.9 cm / 2.9 cm |
 | V3: cos controller | 36.7 s / 18.5 s | 3.1 cm / 1.9 cm | 4.9 cm / 4.3 cm |
 
-The waypoint miss is the smallest distance between the logged path and each waypoint. The mean and worst are over waypoints 1 to 12, from the notebook's waypoint-miss table.
-
-- **Every miss is within `eps`,** so every version reached all 12 waypoints in both runs.
-- **The real robot is about twice as fast:** bigger wheels and faster motors at the same power.
-- **V2 is the most accurate and the slowest** in both runs.
-- **End point:** the tape measurement was not required this week. The last odometry lines are (75.5, 0.1), (78.0, 2.2) and (75.8, −0.9) cm for V1, V2 and V3. Each is within `eps` of (80, 0), because the program stops as soon as the robot is within `eps` of the last waypoint.
-
 ## Discussion
 
 Every version cuts each corner by up to ε (5 cm for V1 and V3, 3 cm for V2), because it switches to the next waypoint ε early, which is why V2 has the smallest misses. V1 swings out widest at the two 180° reversals, because it keeps full forward power while turning. V3 has the same gains but slows down with `cos(e_θ)`, so in the simulator it stays closer to the planned path (at most 3.2 cm away, against 5.0 cm for V1). On the real robot, V2 overshot (30,0), (50,0) and (80,60) by about 3 cm: it switches only 3 cm before each corner, and the robot keeps rolling for a moment after the switch (T_m ≈ 0.2 s in week 5). V1 and V3 weave across the straight lines on the real robot but not in the simulator, which matches the lecture's "K_θ too high" oscillation: the real motors lag and the loop runs every 60 ms instead of 20 ms, while V2 with K_θ = 5 barely weaves. The remaining real-vs-model gap in these plots is a **control** problem, because both curves are odometry and the real robot still reached every waypoint within ε by its own estimate; localization errors such as wheel slip or a wrong r or B cannot show up in these logs at all.
