@@ -91,10 +91,6 @@ vR = v + w · B / 2       → motor M4 (right)
 vL = v − w · B / 2       → motor M3 (left)
 ```
 
-- A differential-drive robot turns by running its two wheels at different speeds.
-- `v` is the common part that moves the robot forward. `w · B / 2` is added to one wheel and taken from the other, because each wheel sits B/2 from the robot's centre.
-- Positive `w` makes the right wheel faster, so the robot turns left.
-- All values are motor power in %, so the gains work in % too.
 
 ### Step 8: Reached? Go to the next waypoint (`eps`)
 
