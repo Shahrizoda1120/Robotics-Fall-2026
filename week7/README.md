@@ -96,13 +96,9 @@ vL = v − w · B / 2       → motor M3 (left)
 
 The inner loop runs while `rho > eps`. Once the robot is within `eps` (the acceptance radius) of the waypoint, the program sets `i = i + 1` and `rho = 100` and starts on the next waypoint. After the last one it stops the motors.
 
-- **Why `eps`:** the robot never lands exactly on a point. Without an acceptance radius it would keep circling around the waypoint.
-- **Why `rho = 100`:** so the inner loop condition is true again before the distance to the new waypoint is computed. `Fixed_1x1_trajectory.qrs` does the same with `dist = 100`.
-- **The cost:** the robot turns toward the next waypoint `eps` early, so every corner is rounded by up to `eps` (see Results).
-
 ### Step 9: Log and wait
 
-Each pass writes one line `x,y,time` to the log file (Write To File) and waits 20 ms (Timer). The old log is deleted at the start (Remove File), because Write To File adds to the end of an existing file and the old run would mix with the new one.
+Each pass writes one line `x,y,time` to the log file (Write To File) and waits 20 ms (Timer). 
 
 ## 3. Three controllers for the forward power `v`
 
