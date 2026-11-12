@@ -206,3 +206,6 @@ One line per sample, no header: `x,y,time`, with `x`, `y` in **cm** and `time` i
 
 - **V1 and V3 weave across the straight lines on the real robot, but not in the simulator.** This is the lecture's "`Kth` too high" oscillation: the real motors react with a delay, and the real loop runs every 60 ms instead of 20 ms. V2, with `Kth` = 5, barely weaves.
 - **The gap visible in these plots is a control problem.** Both curves are the robot's own odometry, and by that estimate the real robot reached every waypoint within `eps`. Localization errors, such as wheel slip or a wrong `r` or `B`, cannot show up in these logs at all; checking them would need an outside measurement, such as the tape measurement.
+
+  ![Result](result.png)
+
