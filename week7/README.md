@@ -61,9 +61,7 @@ thetaG = atan2(dy, dx)
 
 `thetaG` is the direction from the robot to the waypoint, measured from the +x axis, between −π and π.
 
-Why `atan2` and not `atan(dy / dx)`:
-- **`atan` cannot tell front from back.** It only returns angles between −90° and +90°. For dx = 10, dy = 10 and for dx = −10, dy = −10, `dy / dx` is 1 both times, so `atan` gives 45° for both. `atan2` looks at the signs of `dy` and `dx` separately and gives 45° and −135°.
-- **`atan(dy / dx)` breaks when dx is close to 0.** That happens on every vertical line of the 32, for example from (30,0) to (30,30). When the robot drifts a little left or right of x = 30, `dy / dx` blows up and changes sign, so `atan` jumps between +90° and −90° (and at dx = 0 it divides by zero). `atan2` stays close to 90° the whole time.
+
 
 ### Step 4: Course angle (heading error), and wrapping it (`eTheta`)
 
