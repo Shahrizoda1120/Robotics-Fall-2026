@@ -29,8 +29,6 @@ yg = {0, 30, 30, 30, 60, 60, 60, 60, 30, 30, 0, 0}
 
 ## 2. One control step
 
-The program repeats the steps below once every 20 ms until the robot reaches the current waypoint `i`. Step 1 is the week 6 odometry; steps 2, 3, 4, 6 and 7 are the go-to-goal table of the Lab 7 lecture. Program variable names are in parentheses.
-
 ### Step 1: Odometry, where am I? (`x`, `y`, `theta`)
 
 E3 is the left wheel, E4 the right wheel:
