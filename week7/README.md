@@ -156,11 +156,6 @@ v = min(Kv · rho, vMax) · cos(eTheta)
 | V2 | 4 | 5 | 50 | 18 | 3 | 0.5 |
 | V3 | 4 | 8 | 40 | - | 5 | - |
 
-How they were chosen:
-- **V1 and V3 share all gains**, so `cos(eTheta)` is the only difference between them.
-- **`eps` depends on the lowest power.** In V1 and V3 the power just before a waypoint is `Kv · eps` = 4 × 5 = 20 %, just above the 18 % `minPower`. A smaller `eps` could leave the real robot stopped short of a waypoint. V2 never drops below `vMin`, so it can use `eps` = 3 cm.
-- **`turnErr` = 0.5 rad** (the course script uses 1.0) gives sharper corners. Smaller values could make the on-the-spot turning power `Kth · turnErr · B / 2` too small to move the real robot.
-- **`Kth`:** 8 gives tight turns while driving in V1 and V3. In tuning runs on a model of the simulator robot, the loops at the two reversals of the 3 strayed about 11 cm from the path with `Kth` = 5 and about 5 cm with 8. V2 does its big turns on the spot, so 5 is enough. The lecture warns that a `Kth` that is too high makes the robot oscillate around the line.
 
 ## 4. How the program is built
 
