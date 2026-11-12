@@ -42,9 +42,7 @@ y = y + (S − S_old) · sin(theta)
 ```
 
 - The encoders are cleared at the start, so the robot starts at x = 0, y = 0, `theta` = 0.
-- `theta` comes straight from the total wheel angles, without a running sum, so small rounding errors do not pile up from step to step.
-- `x` and `y` must be added up step by step, because where the robot ends up depends on the direction of every piece of the path.
-- Each step assumes `theta` stays the same for 20 ms. The steps are short, so the error from this is small.
+
 
 ### Step 2: Distance to waypoint (`rho`)
 
