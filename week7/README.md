@@ -104,11 +104,11 @@ Each pass writes one line `x,y,time` to the log file (Write To File) and waits 2
 
 The three versions use the same steps 1 to 4 and 6 to 9. They differ only in how `v` is chosen.
 
-| Version | Forward power `v` | Source in the course materials |
+| Version | Forward power `v` | 
 |---|---|---|
-| V1: P controller | `min(Kv·rho, vMax)` | Lab 7 README table |
-| V2: turn, then drive | `0` while `\|eTheta\| > turnErr`, otherwise `max(vMin, min(Kv·rho, vMax))` | `localization+point_to_point.py` (`forward = 0` above an angle limit, `minPower`) |
-| V3: cos controller | `min(Kv·rho, vMax) · cos(eTheta)` | `Fixed_1x1_trajectory.qrs` (`mov = 50 * dist * cos(err)`); the `cos · tanh` law in `Go-to-goal_modeling.ipynb` |
+| V1: P controller | `min(Kv·rho, vMax)` | 
+| V2: turn, then drive | `0` while `\|eTheta\| > turnErr`, otherwise `max(vMin, min(Kv·rho, vMax))` | 
+| V3: cos controller | `min(Kv·rho, vMax) · cos(eTheta)` | 
 
 ### V1: P controller
 
