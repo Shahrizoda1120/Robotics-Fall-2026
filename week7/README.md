@@ -24,9 +24,8 @@ digit 2: (50,60) → (80,60) → (80,30) → (50,30) → (50,0) → (80,0)
 
 xg = {30, 30, 0, 30, 30, 0, 50, 80, 80, 50, 50, 80}
 yg = {0, 30, 30, 30, 60, 60, 60, 60, 30, 30, 0, 0}
-
-![Digit 32: planned waypoints](waypoints_32.png)
 ```
+![Digit 32: planned waypoints](waypoints_32.png)
 
 - (30,30) appears twice: the robot draws the middle bar of the 3 out to (0,30) and comes back along it.
 - The start point is not in the arrays, because the robot is already there.
