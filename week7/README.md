@@ -105,7 +105,7 @@ Each pass writes one line `x,y,time` to the log file (Write To File) and waits 2
 The three versions use the same steps 1 to 4 and 6 to 9. They differ only in how `v` is chosen.
 
 | Version | Forward power `v` | 
-|---|---|---|
+|---|---|
 | V1: P controller | `min(Kv·rho, vMax)` | 
 | V2: turn, then drive | `0` while `\|eTheta\| > turnErr`, otherwise `max(vMin, min(Kv·rho, vMax))` | 
 | V3: cos controller | `min(Kv·rho, vMax) · cos(eTheta)` | 
