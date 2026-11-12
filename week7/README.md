@@ -72,14 +72,6 @@ while |eTheta| > π:   eTheta = eTheta − sgn(eTheta) · 2π
 
 `eTheta` is how far the robot has to turn to face the waypoint: positive means turn left, negative means turn right.
 
-**Why wrap.** Two angles that differ by a full turn (2π, 360°) point the same way, but the controller turns in proportion to the number. `theta` from odometry keeps counting every turn the robot makes, while `thetaG` from `atan2` always stays between −180° and 180°.
-- Example: after one full left turn the robot faces +x again and `theta` = 360°. With the waypoint straight ahead, `thetaG` = 0° and the raw error is −360°, so the robot would spin a whole circle to the right for nothing. Wrapped, the error is 0° and it drives straight on.
-- Wrapping keeps the error between −π and π, so the robot always turns the shorter way round.
-
-**Why a loop and not one `if`.** Subtracting 2π once only fixes errors up to 3π (540°). In the simulator `theta` grew past 720° while drawing the 32, so the raw error could be more than two full turns. The loop repeats the subtraction until the error is in range: for `theta` = 730° and `thetaG` = 0°, it goes −730° → −370° → −10°, a small turn right.
-- `sgn(eTheta)` picks the direction: it subtracts 2π from a positive error and adds 2π to a negative one.
-- This is the subtraction from `Fixed_1x1_trajectory.qrs`, repeated in a loop like the `while a > pi` loops in `localization+point_to_point.py`.
-
 ### Step 5: Forward power (`v`)
 
 This is the only step that differs between the three versions (section 3).
