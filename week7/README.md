@@ -159,8 +159,6 @@ v = min(Kv · rho, vMax) · cos(eTheta)
 
 ## 4. How the program is built
 
-The block structure follows the professor's `Fixed_1x1_trajectory.qrs`:
-
 1. Clear Encoder, Remove File (old log), and a Function that sets `r`, `B`, the gains, the waypoint arrays `xg`, `yg` and the start pose.
 2. **Outer loop** `i < n`: one pass per waypoint.
 3. **Inner loop** `rho > eps`, one control step:
