@@ -1,6 +1,6 @@
 # Week 7: Go-to-goal
 
-**Goal:** drive the digit **32** (the last two digits of my student ID) as a list of waypoints with a go-to-goal controller, using the week 6 odometry as the pose estimate. Each program runs first in the TRIK Studio simulator, then on the real robot, and the runs are compared in Colab. Three versions with three different controllers were tuned and tested.
+**Goal:** drive the digit **32** (the last two digits of my student ID) as a list of waypoints. The robot estimates its own position with the week 6 odometry and steers to one waypoint after another with a go-to-goal controller. Each program runs first in the TRIK Studio simulator, then on the real robot, and the two runs are compared in Colab. Three versions with three different controllers were tuned and tested.
 
 ## Files in this folder
 
@@ -15,110 +15,58 @@
 
 ## 1. Waypoints
 
-Start at (0, 0), facing +x. Waypoints in cm:
+The robot starts at (0, 0), facing +x. The digit is a list of 12 waypoints in cm, stored in the program as two arrays, `xg` (x values) and `yg` (y values):
 
 ```
-digit 3: (30,0) → (30,30) → (0,30) → (30,30) → (30,60) → (0,60)
+digit 3: (0,0) → (30,0) → (30,30) → (0,30) → (30,30) → (30,60) → (0,60)
 gap:     (0,60) → (50,60)
 digit 2: (50,60) → (80,60) → (80,30) → (50,30) → (50,0) → (80,0)
+
+xg = {30, 30, 0, 30, 30, 0, 50, 80, 80, 50, 50, 80}
+yg = {0, 30, 30, 30, 60, 60, 60, 60, 30, 30, 0, 0}
 ```
 
-## 2. The controller
+- (30,30) appears twice: the robot draws the middle bar of the 3 out to (0,30) and comes back along it.
+- The start point is not in the arrays, because the robot is already there.
 
-In every pass of the loop, the program updates the odometry, then computes (Lab 7 lecture):
+## 2. One control step
 
-| Quantity | Formula |
-|---|---|
-| Distance to goal | `ρ = √((x_g − x)² + (y_g − y)²)` |
-| Bearing to goal | `θ_g = atan2(y_g − y, x_g − x)` |
-| Heading error | `e_θ = wrap(θ_g − θ)` into `(−π, π]` |
-| Angular velocity | `ω = K_θ · e_θ` |
-| Wheel powers | `v_R = v + ω·B/2`, `v_L = v − ω·B/2` (M4 right, M3 left, in %) |
+The program repeats the steps below once every 20 ms until the robot reaches the current waypoint `i`. Step 1 is the week 6 odometry; steps 2, 3, 4, 6 and 7 are the go-to-goal table of the Lab 7 lecture. Program variable names are in parentheses.
 
-When `ρ < ε`, the robot switches to the next waypoint. After the last one it stops.
+### Step 1: Odometry, where am I? (`x`, `y`, `theta`)
 
-The three versions differ **only in the forward power `v`**:
-
-| Version | Forward power `v` | Source in the course materials |
-|---|---|---|
-| V1: P controller | `min(K_v·ρ, v_max)` | Lab 7 README table |
-| V2: turn, then drive | `0` while `\|e_θ\| > turnErr`, otherwise `max(v_min, min(K_v·ρ, v_max))` | `localization+point_to_point.py` (`forward = 0` above an angle limit, `minPower`) |
-| V3: cos controller | `min(K_v·ρ, v_max) · cos(e_θ)` | `Fixed_1x1_trajectory.qrs` (`mov = 50 * dist * cos(err)`); the `cos · tanh` law in `Go-to-goal_modeling.ipynb` |
-
-- **V1** drives at full power even when the robot points the wrong way, so it turns while driving.
-- **V2** rotates on the spot until the goal is within `turnErr`, then drives (the lecture's turn-then-drive choice).
-- **V3** slows down as the heading error grows: full speed at 0°, none at 90°, backwards when the goal is behind.
-
-TRIK has no `tanh`, so V3 limits the speed with the lab README's `min(K_v·ρ, v_max)` instead.
-
-### Gains
-
-| | `K_v` | `K_θ` | `v_max`, % | `v_min`, % | `ε`, cm | `turnErr`, rad |
-|---|---|---|---|---|---|---|
-| V1 | 4 | 8 | 40 | - | 5 | - |
-| V2 | 4 | 5 | 50 | 18 | 3 | 0.5 |
-| V3 | 4 | 8 | 40 | - | 5 | - |
-
-How they were chosen:
-- **V1 and V3 share all gains**, so `cos(e_θ)` is the only difference between them.
-- **`ε` depends on the minimum power.** In V1 and V3 the power near a waypoint is `K_v·ρ`, which is 20 % at ρ = 5 cm, just above the 18 % `minPower` of `localization+point_to_point.py`. A smaller ε could leave the real robot stopped just short of a waypoint. V2 never drops below `v_min` = 18 %, so ε = 3 cm is safe.
-- **`turnErr` = 0.5 rad** (the course script uses 1.0) gives sharper corners. Smaller values could make the on-the-spot turning power `K_θ·turnErr·B/2` too small to move the real robot.
-- **`K_θ`**: 8 gives tight turns while driving in V1 and V3. V2 does its big turns on the spot, so 5 is enough.
-
-## 3. How the program works
-
-The block structure follows the professor's `Fixed_1x1_trajectory.qrs`:
-
-1. Clear Encoder, Remove File (old log), and a Function that sets the constants, the waypoint arrays `xg`, `yg` and the pose.
-2. **Outer loop** `i < n`: one pass per waypoint.
-3. **Inner loop** `rho > eps`:
-   - odometry Function;
-   - heading-error wrap;
-   - control Function;
-   - Motors M3, M4;
-   - Write To File;
-   - Timer 20 ms.
-4. Next waypoint (`i = i + 1`), and after the last one, Stop Motors.
-
-**Odometry** (current Lab 6 table, E3 = left wheel, E4 = right wheel):
+E3 is the left wheel, E4 the right wheel:
 
 ```
-S = (φR + φL) · r / 2        θ = (φR − φL) · r / B        (φ = total encoder angle, rad)
-x ← x + ΔS · cos(θ)          y ← y + ΔS · sin(θ)
+aL = encoder3 · π / 180         aR = encoder4 · π / 180        wheel angles, degrees → rad
+S     = (aR + aL) · r / 2       path travelled by the robot's centre
+theta = (aR − aL) · r / B       course: how far the robot has turned from its start direction
+x = x + (S − S_old) · cos(theta)
+y = y + (S − S_old) · sin(theta)
 ```
 
-The wrap is a loop (`while |e_θ| > π: e_θ −= sgn(e_θ)·2π`) rather than a single `if`. In the simulator the robot turns the same way at every reversal, so θ grows past 720°, and one subtraction is not enough.
+- The encoders are cleared at the start, so the robot starts at x = 0, y = 0, `theta` = 0.
+- `theta` comes straight from the total wheel angles, without a running sum, so small rounding errors do not pile up from step to step.
+- `x` and `y` must be added up step by step, because where the robot ends up depends on the direction of every piece of the path.
+- Each step assumes `theta` stays the same for 20 ms. The steps are short, so the error from this is small.
 
-**Simulator vs real program.** Same blocks and gains. Only these differ:
+### Step 2: Distance to waypoint (`rho`)
 
-| | `_sim.qrs` | `_real.qrs` |
-|---|---|---|
-| `r`, `B` | 2.8 cm, 15.4 cm (TRIK Studio 2D robot) | 4.3 cm, 19.6 cm (real robot, measured in week 2) |
-| Log file | `odometry_data_sim_32_vN.txt` | `odometry_data_real_32_vN.txt` |
-| Marker Down / Marker Up | yes, so the simulator draws the path | no |
+```
+dx = xg[i] − x        dy = yg[i] − y
+rho = √(dx² + dy²)
+```
 
-## 4. How the data is organized
+`rho` sets the forward speed (slow down near the waypoint) and decides when the waypoint is reached.
 
-One line per sample, no header: `x,y,time`, with `x`, `y` in **cm** and `time` in **ms** since the program started. For example, `30.086,-0.389,1518` means: 1.518 s after the start, the robot believed it was at x = 30.1 cm, y = −0.4 cm.
+### Step 3: Bearing to waypoint, with `atan2` (`thetaG`)
 
-- Simulator: one line every 20 ms.
-- Real robot: about one line every 60 ms (writing to the file takes time on the robot).
+```
+thetaG = atan2(dy, dx)
+```
 
-## 5. Results
+`thetaG` is the direction from the robot to the waypoint, measured from the +x axis, between −π and π.
 
-| | Run time, sim / real | Mean waypoint miss, sim / real | Worst waypoint miss, sim / real |
-|---|---|---|---|
-| V1: P controller | 35.8 s / 16.3 s | 2.6 cm / 1.5 cm | 5.0 cm / 4.5 cm |
-| V2: turn, then drive | 41.9 s / 19.4 s | 2.0 cm / 1.1 cm | 2.9 cm / 2.9 cm |
-| V3: cos controller | 36.7 s / 18.5 s | 3.1 cm / 1.9 cm | 4.9 cm / 4.3 cm |
-
-The mean and worst misses are over waypoints 1 to 12, from the notebook's waypoint-miss table.
-
-- **Every miss is within ε,** so every version reached all 12 waypoints in both runs.
-- **The real robot is about twice as fast:** bigger wheels and faster motors at the same power.
-- **V2 is the most accurate and the slowest** in both runs.
-- **End point:** the tape measurement was not required this week. The last odometry lines are (75.5, 0.1), (78.0, 2.2) and (75.8, −0.9) cm for V1, V2 and V3. Each is within ε of (80, 0), because the program stops as soon as the robot is within ε of the last waypoint.
-
-## Discussion
-
-Every version cuts each corner by up to ε (5 cm for V1 and V3, 3 cm for V2), because it switches to the next waypoint ε early, which is why V2 has the smallest misses. V1 swings out widest at the two 180° reversals, because it keeps full forward power while turning. V3 has the same gains but slows down with `cos(e_θ)`, so in the simulator it stays closer to the planned path (at most 3.2 cm away, against 5.0 cm for V1). On the real robot, V2 overshot (30,0), (50,0) and (80,60) by about 3 cm: it switches only 3 cm before each corner, and the robot keeps rolling for a moment after the switch (T_m ≈ 0.2 s in week 5). V1 and V3 weave across the straight lines on the real robot but not in the simulator, which matches the lecture's "K_θ too high" oscillation: the real motors lag and the loop runs every 60 ms instead of 20 ms, while V2 with K_θ = 5 barely weaves. The remaining real-vs-model gap in these plots is a **control** problem, because both curves are odometry and the real robot still reached every waypoint within ε by its own estimate; localization errors such as wheel slip or a wrong r or B cannot show up in these logs at all.
+Why `atan2` and not `atan(dy / dx)`:
+- **`atan` cannot tell front from back.** It only returns angles between −90° and +90°. For dx = 10, dy = 10 and for dx = −10, dy = −10, `dy / dx` is 1 both times, so `atan` gives 45° for both. `atan2` looks at the signs of `dy` and `dx` separately and gives 45° and −135°.
+- **`atan(dy / dx)` breaks when dx is close to 0.** That happens on every vertical line of the 32, for example from (30,0) to (30,30). When the robot drifts a little left or right of x = 30, `dy / dx` blows up and changes sign, so `atan` jumps between +90° and −90° (and at dx = 0 it divides by zero). `atan2` stays
