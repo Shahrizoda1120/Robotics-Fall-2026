@@ -16,7 +16,19 @@
 
 $$\omega_{meas} = Q_{\Delta}\big(\mathrm{sat}_{\pm\omega_{max}}[(1+s)\,\omega_{true} + b_0 + d\,t + n]\big), \quad n \sim \mathcal{N}(0,\sigma^2)$$
 
-Read from the inside out: the gyro scales the true rate by $(1+s)$, adds a bias $b_0$ that drifts by $d$ per minute and random noise $n$, clips the result at $\pm\omega_{max}$, and rounds it to steps of $\Delta$.
+Read it from the inside out, in the order the signal passes through the sensor:
+- $\omega_{true}$: how fast the robot really turns (deg/s). The encoders stand in for it.
+- $(1+s)$: **scale-factor error.** The gyro reports $(1+s)$ times the real rate. $s = -5\,\%$ means it reports 95 % of every turn.
+- $b_0$: **bias.** What the gyro outputs when the robot is still (deg/s).
+- $d\,t$: **drift.** The bias changes by $d$ every minute (deg/s/min, t in minutes).
+- $n \sim \mathcal{N}(0,\sigma^2)$: **noise.** A new random value on every sample, Gaussian with mean 0 and standard deviation $\sigma$ (deg/s).
+- $\mathrm{sat}_{\pm\omega_{max}}[\,\cdot\,]$: **saturation.** The output can't go beyond $\pm\omega_{max}$; faster rates are clipped.
+- $Q_{\Delta}(\cdot)$: **quantisation.** The output is an integer, so it is rounded to steps of $\Delta$: $Q_{\Delta}(x) = \Delta \cdot \mathrm{round}(x / \Delta)$.
+- $\omega_{meas}$: what the gyro outputs (deg/s).
+
+The order follows the hardware: scale, bias, drift and noise come from the sensing element, the range limit comes after, and rounding happens last, when the value becomes a number.
+
+**Example** with my model values: the robot turns at 100 deg/s, so the gyro outputs 0.95 × 100 + 0.26 ± 0.07 ≈ 95.3 deg/s. At 400 deg/s, 0.95 × 400 + 0.26 ≈ 380 is above the limit, so the output is 287 deg/s.
 
 ## 2. Experiment
 
@@ -76,13 +88,4 @@ Read from the inside out: the gyro scales the true rate by $(1+s)$, adds a bias 
 
 **Model check.** `gyro_sim`, fed with the encoder rate, follows the real gyro, clipping included. Its heading is 14 to 15° RMS from the real gyro's, against 46 to 49° for an ideal gyro.
 
-## 5. Notes for the course
 
-1. `read()[3]` counts 256 µs, not 1 µs (measured in both runs). Lab 10 takes dt from this timestamp.
-2. Blocks cannot call `readRawData()`. It needs a System Call block with native code, e.g. `gyro_raw = brick.gyroscope().readRawData()[2];` in JavaScript. The README's log line has no `gz_raw`.
-3. JS threads don't share variables: the logging thread never saw `u` or `phase` from the driving thread, so the phases were rebuilt from the schedule. Python generation writes threads in JavaScript syntax, so a program with Fork only runs as JavaScript.
-4. With two threads the log gets one line every ~50 ms when still and ~90 ms when turning, not every ~10 ms.
-5. `read()` already subtracts a bias, although my program never called `calibrate()` (41 and 23 raw units in my two runs), so it depends on what ran before. Using `readRawData()` avoids this.
-6. The course files disagree on the left encoder: E4 in the Lab 6 and 10 READMEs and `Base_observer`, E3 in the Lab 6/7 Python scripts. My gyro sign agrees with E4 = left. `trajectory_blocks.js` is not in the repo.
-7. 30 s of warm-up was not enough: $b_0(T)$ still rises for ~20 s in both runs.
-8. $s$ ≈ -5 % in every unclipped phase of both runs is measured against the encoders, so wheel slip or the real track width may be part of it. A turn of known angle (e.g. 10 turns against a floor mark) would measure $s$ independently.
