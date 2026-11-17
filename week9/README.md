@@ -71,13 +71,3 @@ e(t) is the gyro heading minus the encoder heading during the rotation. Saturati
 
 `gyro_sim`, fed with the encoder rate, follows the real gyro, clipping included. Its heading is 14 to 15° RMS from the real gyro's, against 46 to 49° for an ideal gyro.
 
-## 5. Notes for the course
-
-1. `read()[3]` counts 256 µs, not 1 µs (measured in both runs). Lab 10 takes dt from this timestamp.
-2. Blocks cannot call `readRawData()`. It needs a System Call block with native code, e.g. `gyro_raw = brick.gyroscope().readRawData()[2];` in JavaScript. The README's log line has no `gz_raw`.
-3. JS threads don't share variables: the logging thread never saw `u` or `phase` from the driving thread, so the phases were rebuilt from the schedule. Python generation writes threads in JavaScript syntax, so a program with Fork only runs as JavaScript.
-4. With two threads the log gets one line every ~50 ms when still and ~90 ms when turning, not every ~10 ms.
-5. `read()` already subtracts a bias, although my program never called `calibrate()` (41 and 23 raw units in my two runs), so it depends on what ran before. Using `readRawData()` avoids this.
-6. The course files disagree on the left encoder: E4 in the Lab 6 and 10 READMEs and `Base_observer`, E3 in the Lab 6/7 Python scripts. My gyro sign agrees with E4 = left. `trajectory_blocks.js` is not in the repo.
-7. 30 s of warm-up was not enough: $b_0(T)$ still rises for ~20 s in both runs.
-8. $s$ ≈ -5 % in every unclipped phase of both runs is measured against the encoders, so wheel slip or the real track width may be part of it. A turn of known angle (e.g. 10 turns against a floor mark) would measure $s$ independently.
