@@ -16,7 +16,7 @@
 
 $$\omega_{meas} = Q_{\Delta}\big(\mathrm{sat}_{\pm\omega_{max}}[(1+s)\,\omega_{true} + b_0 + d\,t + n]\big), \quad n \sim \mathcal{N}(0,\sigma^2)$$
 
-Read it from the inside out, in the order the signal passes through the sensor. The gyro takes the robot's real turning rate $\omega_{true}$ and reports it a little wrong: scaled by $(1+s)$, plus a bias $b_0$ (its output when the robot is still) that drifts by $d$ every minute (t in minutes), plus random noise $n$, Gaussian with mean 0 and standard deviation $\sigma$. The result is clipped at $\pm\omega_{max}$, because the output can't go further, and rounded to steps of $\Delta$, because the output is an integer. The order follows the hardware: the errors come from the sensing element, and the range limit and the rounding happen when the value becomes a number.
+The gyro takes the robot's real turning rate $\omega_{true}$ and reports it a little wrong: scaled by $(1+s)$, plus a bias $b_0$ (its output when the robot is still) that drifts by $d$ every minute (t in minutes), plus random noise $n$, Gaussian with mean 0 and standard deviation $\sigma$. The result is clipped at $\pm\omega_{max}$, because the output can't go further, and rounded to steps of $\Delta$, because the output is an integer. The order follows the hardware: the errors come from the sensing element, and the range limit and the rounding happen when the value becomes a number.
 
 For example, with my model values ($s \approx -5\,\%$, $b_0 \approx 0.26$ deg/s, $\sigma \approx 0.07$ deg/s), a turn at 100 deg/s reads 0.95 × 100 + 0.26 ± 0.07 ≈ 95.3 deg/s. At 400 deg/s, 0.95 × 400 + 0.26 ≈ 380 is above the limit, so the gyro reads 287 deg/s.
 
