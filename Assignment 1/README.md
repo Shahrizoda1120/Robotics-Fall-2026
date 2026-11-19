@@ -1,6 +1,15 @@
 # Assignment 1: Motor parameter identification
 
-I measured the two drive motors of my TRIK robot with the wheels in the air and fitted the first-order motor model from the lecture to every step, which gives ω_ss, T_m and k_e for each motor and direction. The model fits each single step, but its "constants" change with PWM. I explain why (dead zone, Coulomb + viscous friction, backward ≥ forward) and build an improved model from the same data. On complex signals it never saw, the improved model raises the speed fit from between 40 and 62 % to between 73 and 96 %.
+I measured the two drive motors of my TRIK robot with the wheels in the air and fitted the first-order motor model from the lecture to every step, which gives ω_ss, T_m and k_e for each motor and direction. The model fits each single step, but its "constants" change with PWM. I explain why (dead zone, Coulomb + viscous friction, backward ≥ forward) and build an updated model from the same data. On signals it never saw, the updated model raises the speed fit from between 40 and 62 % to between 73 and 96 %.
+
+## Full cycle
+
+1. **Identify the model parameters** from the steps and the coasting:
+   - no-load speed ω_ss at every PWM, and k_e (Tables 1 and 2; wheels in the air, so no load)
+   - T_m separately for every step (Table 1, Figure 1c)
+   - Coulomb friction a and viscous friction coefficient β (Table 3)
+   - the constants of the updated model (Table 5)
+2. **Test on other signals** that were not used to build the models (square wave + chirp, slow triangle, slow chirp): simple (course) model vs updated (improved) model vs real measurement (Table 6, Figures 3 and 4).
 
 ## Folder contents
 
@@ -19,7 +28,7 @@ I measured the two drive motors of my TRIK robot with the wheels in the air and 
 
 dω/dt = U / (T_m · k_e) − ω / T_m, with U = PWM/100 · U_battery
 
-- ω_ss [rad/s]: the steady speed, ω_ss = U / k_e.
+- ω_ss [rad/s]: the steady (no-load) speed, ω_ss = U / k_e.
 - T_m [s]: the time constant; the motor reaches 63 % of ω_ss after T_m.
 - k_e [V·s/rad]: the volts needed for 1 rad/s of steady speed.
 
@@ -58,7 +67,7 @@ Every run ends with 1 s at PWM 0 (coasting), still logged. Amplitudes stay at or
 
 **Where to find the required report items:**
 - Estimated values: Table 2.
-- Plots: step responses in Figure 1a, speed from PWM in Figure 1b, T_m from PWM in Figure 1c, complex signals in Figures 3 and 4, error over time in Figure 3 (row 3), artifacts in Figure 5.
+- Plots: step responses in Figure 1a, speed from PWM in Figure 1b, T_m from PWM in Figure 1c, complex signal in Figures 3a, 3b and 4, error over time in Figure 3c, artifacts in Figure 5.
 - Analysis: the Report section at the end of the notebook.
 
 ## How to run
@@ -67,6 +76,12 @@ Every run ends with 1 s at PWM 0 (coasting), still logged. Amplitudes stay at or
 - **Locally:** run it from this folder with numpy, pandas, scipy and matplotlib installed. It reads `motor_data/` directly and takes about 10 s.
 
 ## Results
+
+### Identified parameters
+
+- **No-load speed ω_ss (Table 1):** M3 from 4.66 rad/s at 10 % to 15.39 rad/s at 100 % forward, and −4.81 to −15.24 rad/s backward; M4 from 3.95 to 14.87 rad/s forward, and −3.73 to −14.16 rad/s backward.
+- **T_m for every step (Table 1):** it falls from 0.342 s at 10 % to 0.025 s at 100 % (M3 forward), and from 0.297 s to 0.019 s on M4 forward.
+- **Coulomb friction a and viscous friction coefficient β (Table 3):** M3 forward 11.08 rad/s² and 1.23 1/s; M3 backward 10.29 and 0.97; M4 forward 2.00 and 4.10; M4 backward 6.03 and 2.84.
 
 ### Estimated values (Table 2)
 
@@ -79,7 +94,7 @@ The repeat run on M4 matches run 1 within 0.7 %.
 
 ### Where the course model breaks
 
-- Each step fits well, but T_m is not constant: 0.342 s at 10 % and 0.025 s at 100 % (M3 forward), with the same load.
+- Each step fits well, but T_m is not constant (see above), with the same load.
 - The ω_ss lines do not pass through zero: they reach zero speed 32.5 to 48.3 % PWM on the other side. Near zero the speed jumps to about 4 rad/s within a few percent, then grows in a straight line (an S-shape).
 
 ### Three outcomes
@@ -88,7 +103,7 @@ The repeat run on M4 matches run 1 within 0.7 %.
 - **Coulomb + viscous friction:** at PWM 0 no current flows, so while coasting only friction acts: dω/dt = −a · sign(ω) − β · ω. Both parts are needed (lowest error in all four cases). M3 is mostly Coulomb friction, M4 mostly viscous. The wheel rolls 0.4 to 5.9 rad after power-off; the friction model predicts this distance with 0.44 and 0.42 rad error, the course model with 1.73 and 0.85 rad.
 - **Backward ≥ forward:** backward k_e is 5.0 % (M3) and 5.4 % (M4) larger, so backward needs more volts per rad/s. M4 backward is slower at every PWM. M3 backward has a bigger jump near zero, so it is faster at 10 and 50 % and slower only at 100 %. Backward coasting friction is 14 to 20 % smaller, so the cause is in the motor itself, not in friction. Effect: the wheel drifts forward 13.1 rad (M3) and 17.2 rad (M4) on the symmetric slow chirp.
 
-### Improved formula
+### Updated (improved) model
 
 For each motor and direction:
 
@@ -96,15 +111,15 @@ For each motor and direction:
 - PWM ≠ 0: J' · dω/dt = U − (U / ω_ss(U)) · ω, so the time constant T_m(U) = J' · ω_ss(U) / U falls with PWM.
 - PWM = 0: dω/dt = −a · sign(ω) − β · ω, friction only.
 
-All constants come from the steps and the coasting (Table 5). The complex signals are only used to test the model.
+All constants come from the steps and the coasting (Table 5). The other signals are only used to test the model.
 
-Speed fit, course model → improved model:
+Speed fit, simple (course) model → updated model:
 
 - Slow triangle: 39.8 → 96.1 % (M3) and 47.1 → 95.2 % (M4).
 - Slow chirp: 50.7 → 78.9 % and 58.4 → 84.0 %.
 - Square wave + chirp: 56.4 → 79.7 % and 61.7 → 72.8 %. On the square wave alone it reaches 85.2 and 83.4 %; the error is largest in the fast chirp.
-- Forward drift on the slow chirp: the improved model gives 13.6 and 16.4 rad (measured 13.1 and 17.2), the course model only 7.0 and 7.7.
-- Frequency response: the measured speed/voltage ratio falls from 1.55 and 1.36 at 0.36 Hz to 0.63 and 0.69 at 2 Hz, far above the course formula; the improved model follows it.
+- Forward drift on the slow chirp: the updated model gives 13.6 and 16.4 rad (measured 13.1 and 17.2), the course model only 7.0 and 7.7.
+- Frequency response: the measured speed/voltage ratio falls from 1.55 and 1.36 at 0.36 Hz to 0.63 and 0.69 at 2 Hz, far above the course formula; the updated model follows it.
 
 ### Artifacts
 
