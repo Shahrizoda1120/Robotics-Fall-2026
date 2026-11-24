@@ -138,3 +138,5 @@ The two other paths show what the other sensor would have said:
 |---|---|---|
 | Run A ends at (cm) | (79.3, 0.5), logged | (73.4, −4.8) |
 | Run B ends at (cm) | (85.6, 5.6) |
+
+**Conclusion.** The gyro (run B) gives the better course. In the logs run B is slightly closer to the ideal digit, the gyro is not affected by wheel slip or `B`, its bias after the 10 s calibration adds only about 0.2° per run, and it never saturated. The encoders see only the wheels, and in the turns they differ from the gyro by about 3 %. The margin is small, and in longer runs the gyro bias would drift, so the best course combines both sensors (Lab 11).
