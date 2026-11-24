@@ -9,7 +9,7 @@
 | `lab10_odometry_gyro.qrs` | TRIK program (JavaScript), the same for both runs. `MODE` in the first block chooses where the course comes from: `MODE = 1` for run A, `MODE = 2` for run B. |
 | `lab10_run_A.txt` | Log of run A (`MODE = 1`). Course from the **encoders**: `course = course_odom`, the difference between the two wheels. |
 | `lab10_run_B.txt` | Log of run B (`MODE = 2`). Course from the **gyroscope**: `course = course + gyro_inc`, the gyro's turning rate added up every cycle. |
-| `lab10_task_odometry_gyro.ipynb` | Colab notebook: Step 4 plots, the offline recomputation and the comparison table |
+| `lab10_task_odometry_gyro.ipynb` | Colab notebook: plots, the offline recomputation and the comparison table |
 
 ## 1. Idea of the experiment
 
@@ -128,7 +128,7 @@ Both runs passed all 12 waypoints.
 
 In run B the robot turned slowly at (80, 30), about 5 deg/s for 5 s, under the same motor command as at the other corners. The encoders and the gyro agree on that turn (24.1° both), so the wheels did not slip, and the run went on normally.
 
-## 6. Offline recomputation (Step 4.2)
+## 6. Offline recomputation
 
 The notebook repeats the robot's formulas from the raw columns `theta_l, theta_r, gz, gt` and computes both methods for both runs, which gives 4 paths. The method each run used reproduces its log exactly (table above), so the logs and the program agree.
 
@@ -141,7 +141,7 @@ The two other paths show what the other sensor would have said:
 
 The two methods end about 8 cm apart in both runs. In the notebook's trajectory plot the dashed paths move a little further from the logged ones at every turn, so the gap is largest on the 2.
 
-## 7. Comparison table (Steps 4.3 and 4.4)
+## 7. Comparison table
 
 - `course_ref`, `path_ref`: direction and length of the ideal segment.
 - `course`: the logged course, averaged over the straight part of the segment. The straight is the longest stretch of cycles where both wheels turn forward, so the turn in place, the rolling past the previous waypoint and the last steering onto the waypoint are left out.
@@ -183,7 +183,7 @@ Relative to the last waypoint (80, 0) and its course 0°, from the logs: final p
 
 The same 3 to 4 % in every turn, left and right, in both runs, is a systematic error, not random slip. It comes from `B`, from `s`, or from slip that repeats in every turn, and the logs cannot separate them: `B = 19.6` cm with a gyro that reads 3.3 % low fits as well as `s = −4.7` % with `B ≈ 19.3` cm. `B_hat` (19.95 cm in run A, 19.89 cm in run B, from `Base_observer.qrs`) is the base that would make the encoders agree with the raw gyro, and with it the difference halves. In Lab 9 the gyro read 4.7 % less than the encoders; here it reads about 3.3 % less. `B` is fixed and Lab 9 found `s` repeatable within 1 percentage point, so this change points to slip, which depends on the floor and the turn speed. So run A (encoders) was hurt mainly by `B` or slip in the turns, and run B (gyro) by `s`, because Lab 9's `s` was itself measured against the encoders. A turn checked against a floor mark would settle which one is right.
 
-**Does the error accumulate or stay bounded (Step 4.5)?** `d_course` stays bounded, −10 to +14°, with no trend from segment to segment, because each run steers its own course back onto every waypoint. The distance to the ideal segment stays below 4 cm (A) and 3 cm (B) up to segment 9 and jumps after the turn into segment 10, to 5.3 cm (A) and 4.3 cm (B). The disagreement between the two sensors does accumulate: it changes at every turn, and nothing on the robot corrects it.
+**Does the error accumulate or stay bounded?** `d_course` stays bounded, −10 to +14°, with no trend from segment to segment, because each run steers its own course back onto every waypoint. The distance to the ideal segment stays below 4 cm (A) and 3 cm (B) up to segment 9 and jumps after the turn into segment 10, to 5.3 cm (A) and 4.3 cm (B). The disagreement between the two sensors does accumulate: it changes at every turn, and nothing on the robot corrects it.
 
 **How to combine `course_odom` and `gyro_inc`?** The gyro is better over short times: it is not affected by slip or `B`, and its leftover bias adds almost nothing during one turn. The encoders are better over long times: they have no bias drift. So the course should follow the gyro and be pulled slowly toward `course_odom`, which is the Lab 11 complementary filter:
 
