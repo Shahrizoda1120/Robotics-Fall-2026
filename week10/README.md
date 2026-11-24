@@ -24,7 +24,7 @@ The two runs differ only in where the course comes from:
 | `MODE` | 1 | 2 |
 | `course` from | encoders: `course = course_odom` | gyro: `course = course + gyro_inc` |
 | `path` from | encoders | encoders |
-| What can make the course wrong | wrong `r` or `B`, unequal wheels, wheel slip in turns | gyro bias `b0`, scale factor `s`, saturation |
+
 
 The digit, start pose, controller and gains are the same in both runs, so any difference between A and B comes from the course.
 
