@@ -86,10 +86,3 @@ From the logs, relative to the last waypoint (80, 0) and its course 0°, the fin
 
 **Conclusion.** The gyro gives a slightly better course than the encoders, because slip and `B` do not affect it, but the margin is small and its bias drifts over longer runs, so combining both sensors is best.
 
-## 6. Differences from `Base_observer.qrs`
-
-| Change | Why |
-|---|---|
-| Stop when `distance * cos(courseAngle)` ≤ 1 cm, not `distance` < 5 cm | A 5 cm circle starts each turn early and tilts the next segment, while a 1 cm circle is missed at 60 ms per cycle. |
-| Steering `25 * sin(courseAngle)`, not `50 * courseAngle` | The cycle is 60 ms instead of ~10 ms, and `sin` stays bounded near a waypoint. |
-| Turn in place first | Turn-then-drive, as the README recommends. |
