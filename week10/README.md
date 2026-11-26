@@ -13,14 +13,20 @@
 
 ## 1. Method
 
-The program is `Base_observer.qrs` with the README formulas, using E4 as the left wheel, E3 as the right wheel, r = 4.3 cm, B = 19.6 cm and the gyro scale factor s = −4.7 % from Lab 9. It computes both courses in every cycle, and `MODE` decides which one the robot uses:
+The program is `Base_observer.qrs` with the README formulas, using r = 4.3 cm, B = 19.6 cm and the gyro scale factor s = −4.7 % from Lab 9. In every cycle it computes both courses, and `MODE` decides which one the robot uses:
 
 ```
-gyro_inc = (gz - b0) / 1000 / (1 + s) * (gt - prev_gt) * 0.000256 * pi / 180;
-course = (2 - MODE) * course_odom + (MODE - 1) * (course + gyro_inc);
+theta_l = encoder4 * pi / 180;                  -- left wheel angle, rad (E4)
+theta_r = encoder3 * pi / 180;                  -- right wheel angle, rad (E3)
+path = (theta_r + theta_l) * r / 2;             -- distance driven by the robot centre, cm
+course_odom = (theta_r - theta_l) * r / B;      -- course from the encoders, rad
+gyro_inc = (gz - b0) / 1000 / (1 + s) * (gt - prev_gt) * 0.000256 * pi / 180;   -- course change from the gyro in one cycle, rad
+course = (2 - MODE) * course_odom + (MODE - 1) * (course + gyro_inc);       -- course the robot uses
+x = x + (path - prev_path) * cos(course);       -- position, cm
+y = y + (path - prev_path) * sin(course);
 ```
 
-With `MODE = 1` this line becomes `course = course_odom`, and with `MODE = 2` it becomes `course = course + gyro_inc`. Here `gz` is the gyro rate in mdeg/s, `gt` is the gyro timestamp in units of 256 µs, and `b0` is the mean `gz` over 10 s at rest before each run.
+With `MODE = 1` the course line becomes `course = course_odom`, and with `MODE = 2` it becomes `course = course + gyro_inc`. Here `gz` is the gyro rate in mdeg/s, `gt` is the gyro timestamp in units of 256 µs, and `b0` is the mean `gz` over 10 s at rest before each run.
 
 The robot turns in place until it faces the next waypoint (within 0.05 rad) and then drives to it. The waypoints, in cm, are (0, 0) → (30, 0) → (30, 30) → (0, 30) → (30, 30) → (30, 60) → (0, 60) → (50, 60) → (80, 60) → (80, 30) → (50, 30) → (50, 0) → (80, 0). Each log line is `t, i, theta_l, theta_r, gz, gt, x, y, course`, so it holds both the raw sensors and the robot's estimate; lines with `i = -1` are the 10 s at rest.
 
@@ -78,7 +84,7 @@ From the logs, relative to the last waypoint (80, 0) and its course 0°, the fin
 
 **How would you combine `course_odom` and `gyro_inc`?** The gyro is better over short times, because slip and `B` do not affect it, and the encoders are better over long times, because they have no bias drift. A complementary filter uses both: `course = K * (course + gyro_inc) + (1 - K) * course_odom` follows the gyro and slowly pulls the course toward `course_odom`. With the 60 ms cycle, `K = 0.98` gives a time constant of about 3 s. This is Lab 11.
 
-**Conclusion.** The gyro (run B) gives the better course here: run B is slightly closer to the digit, and the gyro is not affected by slip or `B`, adds only about 0.2° per run from its bias, and never saturated. The margin is small, however, and over longer runs the gyro bias would drift, so the best course combines both sensors.
+**Conclusion.** The gyro gives a slightly better course than the encoders, because slip and `B` do not affect it, but the margin is small and its bias drifts over longer runs, so combining both sensors is best.
 
 ## 6. Differences from `Base_observer.qrs`
 
