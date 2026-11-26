@@ -48,6 +48,3 @@ $$T_m\dot\omega=\frac{u-U}{k_e}-(|d|+b)\,\omega,\qquad u=d\cdot U_{battery}$$
 - The steps are sampled every 49 ms, the complex signals every 90 to 96 ms.
 - `battery.txt` and `encoders.txt` also keep lines from earlier runs (Assignment 1 and a first steps run I do not use). The notebook takes the last line of each ground file.
 
-## How to run
-
-Keep the notebook next to `motor_data_ground/`, or open it in Colab and upload the six files when the first cell asks. It needs numpy, pandas, scipy and matplotlib and runs in one to two minutes, because every fit starts from four initial guesses.
