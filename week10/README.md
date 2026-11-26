@@ -74,15 +74,22 @@ From the logs, relative to the last waypoint (80, 0) and its course 0°, the fin
 
 ## 5. Analysis
 
-**Which run is closer to the ideal trajectory in course, and which in path?** Run B is closer in both, but only by a small margin: its mean abs(`d_course`) is 6.3° against 6.6° for run A, and its total path error is +6.8 % against +8.9 %. Both runs end within 1.2 cm of (80, 0). These numbers come from each run's own estimate, so they mainly show how well the same controller followed that estimate.
+**Which run is closer to the ideal trajectory in course, and which in path?** Run B is closer in both, by a small margin: mean abs(`d_course`) 6.3° against 6.6°, and total path error +6.8 % against +8.9 %.
 
-**Why are the path errors similar while the course errors are not?** The path comes from the encoders in both runs, so it carries the same errors in both, and the extra 7 to 9 % is real wheel travel from rolling past each waypoint and from the centre moving during the turns. The course comes from two different sensors. In the logs the course errors still look alike, because both are dominated by the same overshoot of 10 to 15° after each turn, but the recomputation shows the real difference: with the other sensor, each run ends about 8 cm away from where it logged.
+**Why are the path errors similar while the course errors are not?** Both runs measure the path with the encoders, so their path errors are similar. The course comes from two different sensors, and the recomputation shows how much they differ: with the other sensor, each run ends about 8 cm away from its logged end. In the logs themselves the course errors are close, because each run steers its own course back onto every waypoint.
 
-**Which error source dominated each run?** The bias did not, because after the 10 s average `b0` is known to 0.004 deg/s, which adds only about 0.2° per run, and saturation did not either, because the fastest turn was 91 deg/s against a gyro range of 287 deg/s. The recomputation shows that the two sensors disagree in the turns, where the encoders measure 3.3 % (run A) and 3.4 % (run B) more rotation than the raw gyro, while on the straights they agree within 3°. The dominant error therefore comes from the turns: `B` or wheel slip for the encoder course of run A, and the scale factor `s` for the gyro course of run B. The logs alone cannot tell which of the two sensors is right.
+**Which error source dominated each run?** Not the gyro bias, which adds only about 0.2° per run after the 10 s calibration, and not saturation, since the fastest turn was 91 deg/s and the gyro range is 287 deg/s. The two sensors agree on the straights (within 3°) but differ in the turns, where the encoders measure about 3 % more rotation than the raw gyro. So the error comes from the turns: for the encoders (run A) that means `B` or wheel slip, and for the gyro (run B) the scale factor `s`. The logs alone cannot show which sensor is right.
 
-**Does the error accumulate or stay bounded?** `d_course` stays between −10° and +14° with no trend, because each run steers back onto every waypoint. The distance to the ideal segment stays under 4 cm up to segment 9 and jumps after the turn into segment 10, to 5.3 cm in run A and 4.3 cm in run B.
+**Does the error accumulate or stay bounded?** It stays bounded: `d_course` stays between −10° and +14° without a trend. The distance to the ideal segment is largest after the turn into segment 10, 5.3 cm in run A and 4.3 cm in run B.
 
-**How would you combine `course_odom` and `gyro_inc`?** The gyro is better over short times, because slip and `B` do not affect it, and the encoders are better over long times, because they have no bias drift. A complementary filter uses both: `course = K * (course + gyro_inc) + (1 - K) * course_odom` follows the gyro and slowly pulls the course toward `course_odom`. With the 60 ms cycle, `K = 0.98` gives a time constant of about 3 s. This is Lab 11.
+**How would you combine `course_odom` and `gyro_inc`?** With the complementary filter of Lab 11, `course = K * (course + gyro_inc) + (1 - K) * course_odom`, which follows the gyro and slowly corrects it with the encoders.
 
-**Conclusion.** The gyro gives a slightly better course than the encoders, because slip and `B` do not affect it, but the margin is small and its bias drifts over longer runs, so combining both sensors is best.
+**Conclusion.** Run B, with the course from the gyro, came out slightly closer to the ideal digit than run A, but the difference between the two runs is small.
 
+## 6. Differences from `Base_observer.qrs`
+
+| Change | Why |
+|---|---|
+| Stop when `distance * cos(courseAngle)` ≤ 1 cm, not `distance` < 5 cm | A 5 cm circle starts each turn early and tilts the next segment, while a 1 cm circle is missed at 60 ms per cycle. |
+| Steering `25 * sin(courseAngle)`, not `50 * courseAngle` | The cycle is 60 ms instead of ~10 ms, and `sin` stays bounded near a waypoint. |
+| Turn in place first | Turn-then-drive, as the README recommends. |
